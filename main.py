@@ -6,12 +6,14 @@ import urlextract
 def get_links() -> list:
     """
     Принимает многострочный текст на вход, для извлечения ссылок из него. При вводе пустой строки он прерывается.
-    Использует библиотеку urlextract
+    Использует библиотеку urlextract для выделения ссылок из текста.
     :param path: Путь к текстовому файлу
     :return: Список строк(ссылок)
     """
-    # # Читаем входящие строки
+    # Читаем входящие строки
+    print('Введите строки для обработки. Введите пустую строку и нажмите "enter" для начала выполнения скрипта')
     strings = "\n".join(iter(input, ""))
+    print('Ожидайте...')
 
     # Собираем список ссылок из строк
     links = []
@@ -29,7 +31,7 @@ def get_links_allow_methods(links: list) -> json:
     """
     Принимает на вход список ссылок, проверяет какие методы доступны по ссылке (код ответа != 405) из словаря methods,
     делая запросы с помощью библиотеки requests
-    :param links: список ссылок
+    :param links: список ссылок (list['str'..])
     :return: json файл с доступными методами
     """
     # Словарь проверяемых методов
@@ -39,25 +41,25 @@ def get_links_allow_methods(links: list) -> json:
         'PUT': requests.put,
         'DELETE': requests.delete,
         'HEAD': requests.head,
-        'OPTIONS': requests.options
+        'OPTIONS': requests.options,
+        'PATCH': requests.patch
     }
 
-    res = {}
+    result = {}
 
     for link in links:
-        res[link] = {}
+        result[link] = {}
         for method in methods:
-            r = methods[method](link)
-            if r.status_code != 405:
-                res[link][method] = r.status_code
+            response = methods[method](link)
+            if response.status_code != 405:
+                result[link][method] = response.status_code
 
-    js = json.dumps(res, indent=4)
+    js = json.dumps(result, indent=4)
     return js
 
 
 if __name__ == '__main__':
     lst = get_links()
-    print(lst)
     result = get_links_allow_methods(lst)
 
     print(result)
